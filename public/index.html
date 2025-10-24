@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Web Downloader</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap");
+      :root {
+        --primary-color: #4f46e5;
+        --primary-hover: #4338ca;
+        --background-color: #f3f4f6;
+        --container-bg: #ffffff;
+        --text-color: #1f2937;
+        --subtle-text: #6b7280;
+        --border-color: #d1d5db;
+        --success-color: #10b981;
+      }
+      body {
+        font-family: "Inter", sans-serif;
+        line-height: 1.6;
+        background-color: var(--background-color);
+        color: var(--text-color);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        padding: 1rem;
+      }
+      .container {
+        background: var(--container-bg);
+        padding: 2.5rem;
+        border-radius: 16px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05),
+          0 4px 10px rgba(0, 0, 0, 0.02);
+        width: 100%;
+        max-width: 550px;
+        text-align: center;
+      }
+      h1 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        margin-top: 0;
+        margin-bottom: 0.5rem;
+      }
+      h1 .rocket {
+        display: inline-block;
+        transform: rotate(45deg);
+        margin-left: 8px;
+      }
+      .container > p {
+        color: var(--subtle-text);
+        margin-bottom: 2rem;
+      }
+      .form-group {
+        margin-bottom: 1.5rem;
+        text-align: left;
+      }
+      label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        font-size: 0.875rem;
+      }
+      input[type="url"],
+      select {
+        width: 100%;
+        padding: 12px 14px;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        box-sizing: border-box;
+        font-size: 1rem;
+        transition: border-color 0.2s, box-shadow 0.2s;
+      }
+      input[type="url"]:focus,
+      select:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+        outline: none;
+      }
+      button {
+        background: var(--primary-color);
+        color: white;
+        padding: 14px 20px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        width: 100%;
+        font-size: 1.1rem;
+        font-weight: 600;
+        transition: background-color 0.2s;
+      }
+      button:hover {
+        background: var(--primary-hover);
+      }
+      #result {
+        margin-top: 1.5rem;
+        text-align: center;
+      }
+      #spinner {
+        display: none;
+        margin-top: 1.5rem;
+        color: var(--subtle-text);
+        font-weight: 600;
+      }
+      .download-link {
+        display: inline-block;
+        margin-top: 0.5rem;
+        padding: 12px 25px;
+        background-color: var(--success-color);
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: bold;
+        transition: background-color 0.2s;
+      }
+      .download-link:hover {
+        opacity: 0.9;
+      }
+      .error-text {
+        color: #ef4444;
+        font-weight: 600;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Web Downloader <span class="rocket">🚀</span></h1>
+      <p>Unduh video atau audio dari berbagai platform favorit Anda.</p>
+      <form id="download-form">
+        <div class="form-group">
+          <label for="url">URL Video/Audio</label>
+          <input
+            type="url"
+            id="url"
+            name="url"
+            placeholder="https://www.youtube.com/watch?v=..."
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label for="format">Pilih Format</label>
+          <select id="format" name="format">
+            <option value="mp4">Video (MP4)</option>
+            <option value="mp3">Audio (MP3)</option>
+          </select>
+        </div>
+        <button type="submit">Download</button>
+      </form>
+      <div id="spinner" style="display: none">Memproses, harap tunggu...</div>
+      <div id="result"></div>
+    </div>
+    <script>
+      const form = document.getElementById("download-form");
+      const resultDiv = document.getElementById("result");
+      const spinner = document.getElementById("spinner");
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const formData = new FormData(form);
+        const url = formData.get("url");
+        const format = formData.get("format");
+
+        resultDiv.innerHTML = "";
+        spinner.style.display = "block";
+
+        try {
+          const response = await fetch("/download", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ url, format }),
+          });
+          const data = await response.json();
+
+          if (data.success) {
+            resultDiv.innerHTML = `
+                <p><strong>Download Selesai!</strong></p>
+                <a href="${data.downloadLink}" download="${data.fileName}" class="download-link">
+                  Unduh File
+                </a>`;
+          } else {
+            resultDiv.innerHTML = `<p class="error-text">Error: ${data.error}</p>`;
+          }
+        } catch (error) {
+          resultDiv.innerHTML = `<p class="error-text">An unexpected error occurred: ${error.message}</p>`;
+        } finally {
+          spinner.style.display = "none";
+        }
+      });
+    </script>
+  </body>
+</html>
