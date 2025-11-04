@@ -31,7 +31,9 @@ app.post("/download", (req, res) => {
   const timestamp = Date.now();
   const outputFileName = `${timestamp}_fairus_vlogger`;
   const outputPath = path.join(downloadsDir, outputFileName);
-  console.log(`[INFO] Memulai download untuk URL: ${url}`);
+  console.log(
+    `[INFO] Memulai download untuk URL: ${url} dengan format: ${format}`
+  );
 
   const args = [];
 
@@ -39,6 +41,7 @@ app.post("/download", (req, res) => {
     args.push(
       "--audio-format",
       "mp3",
+      "--extract-audio",
       "--audio-quality",
       "0",
       url,
@@ -89,6 +92,7 @@ app.post("/download", (req, res) => {
         res.json({
           success: true,
           downloadLink: `/play/${finalFileName}`,
+          type: format,
           fileName: finalFileName,
         });
       } else {

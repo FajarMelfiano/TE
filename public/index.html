@@ -178,7 +178,14 @@
           if (data.success) {
             resultDiv.innerHTML = `
                 <p><strong>Download Selesai!</strong></p>
-                <a href="${data.downloadLink}" download="${data.fileName}" class="download-link">
+                ${
+                  data.type
+                    ? `<video src="${data.downloadLink}" style="width: 100%; max-height: 500px;" controls></video>`
+                    : `<audio src="${data.downloadLink}></audio>`
+                }
+                <a href="${data.downloadLink}" download="${
+              data.fileName
+            }" class="download-link">
                   Unduh File
                 </a>`;
           } else {
